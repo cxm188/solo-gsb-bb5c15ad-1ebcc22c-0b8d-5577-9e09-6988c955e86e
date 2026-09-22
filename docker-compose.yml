@@ -1,0 +1,19 @@
+services:
+  dicom-anonymizer:
+    build: .
+    image: dicom-anonymizer:latest
+    container_name: dicom-anonymizer
+    ports:
+      - "8000:8000"
+    volumes:
+      - dicom-jobs:/data/jobs
+    environment:
+      # Uploaded files and resulting ZIPs live here; jobs older than the TTL
+      # are swept on startup.
+      WORK_ROOT: /data/jobs
+      JOB_TTL_SECONDS: "3600"
+      MAX_UPLOAD_BYTES: "4294967296"   # 4 GiB
+    restart: unless-stopped
+
+volumes:
+  dicom-jobs:

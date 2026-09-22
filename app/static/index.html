@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DICOM 匿名化工作台</title>
+<link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">◈</span>
+    <div>
+      <h1>DICOM 匿名化工作台</h1>
+      <p class="subtitle">患者级稳定伪名 · UID 全量重写 · 序列引用保持 · 本地运行，无需第三方账号</p>
+    </div>
+  </div>
+  <div id="step-indicator" class="steps">
+    <span class="step active" data-step="1">1 上传</span>
+    <span class="sep">›</span>
+    <span class="step" data-step="2">2 配置与预览</span>
+    <span class="sep">›</span>
+    <span class="step" data-step="3">3 下载</span>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- Step 1: upload -->
+  <section id="panel-upload" class="panel active">
+    <div id="dropzone" class="dropzone">
+      <input type="file" id="file-input" multiple webkitdirectory hidden />
+      <input type="file" id="file-input-files" multiple hidden />
+      <div class="dz-inner">
+        <div class="dz-icon">⬆</div>
+        <p class="dz-title">拖拽 DICOM 文件 / 文件夹 / ZIP 到此处</p>
+        <p class="dz-hint">或</p>
+        <div class="dz-buttons">
+          <button class="btn" id="pick-files">选择文件</button>
+          <button class="btn ghost" id="pick-folder">选择文件夹</button>
+        </div>
+        <p class="dz-foot">所有数据仅在本机处理，刷新后任务保留 1 小时</p>
+      </div>
+    </div>
+    <div id="upload-list" class="upload-list hidden"></div>
+    <div class="actions">
+      <button id="btn-upload" class="btn primary" disabled>上传并扫描</button>
+      <span id="upload-status" class="status"></span>
+    </div>
+  </section>
+
+  <!-- Step 2: config + preview -->
+  <section id="panel-config" class="panel">
+    <div class="config-grid">
+      <div class="profiles" id="profile-cards"></div>
+      <div class="options card">
+        <h3>重写内容（所有配置均生效）</h3>
+        <ul class="always-list">
+          <li><b>PatientName / PatientID</b>：替换为患者级稳定伪名</li>
+          <li><b>Patient / Study / Series / SOP / FrameOfReference UID</b>：基于加盐哈希确定性重写</li>
+          <li><b>序列内引用</b>：递归遍历全部 Sequence，引用的 UID 同步替换，检查关系不变</li>
+          <li><b>审计标签</b>：写入 PatientIdentityRemoved = YES 及匿名化方法</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="summary-bar card" id="summary-bar"></div>
+    <div class="hierarchy" id="hierarchy"></div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="changes">逐字段变更清单</button>
+      <button class="tab" data-tab="uids">UID 映射</button>
+      <button class="tab" data-tab="files">文件清单</button>
+    </div>
+    <div class="tab-body" id="tab-changes"></div>
+    <div class="tab-body hidden" id="tab-uids"></div>
+    <div class="tab-body hidden" id="tab-files"></div>
+
+    <div class="actions">
+      <button id="btn-back" class="btn ghost">‹ 重新上传</button>
+      <button id="btn-anonymize" class="btn primary">执行匿名化并打包 ZIP</button>
+      <span id="preview-status" class="status"></span>
+    </div>
+  </section>
+
+  <!-- Step 3: download -->
+  <section id="panel-done" class="panel">
+    <div class="done card">
+      <div class="done-icon">✓</div>
+      <h2>匿名化完成</h2>
+      <p id="done-summary"></p>
+      <div class="done-actions">
+        <a id="link-zip" class="btn primary" href="#">下载匿名化 ZIP</a>
+        <a id="link-report" class="btn" href="#">下载 TXT 变更报告</a>
+      </div>
+      <p class="dz-foot">建议在 DICOM 查看器中验证后再分发；可返回重新选择配置。</p>
+      <div id="done-failures"></div>
+      <div class="actions">
+        <button id="btn-again" class="btn ghost">‹ 返回预览</button>
+        <button id="btn-restart" class="btn ghost">处理新的一组影像</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <span>FastAPI · pydicom · 100% 本地处理</span>
+</footer>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
